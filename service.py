@@ -119,5 +119,54 @@ def rag_match_resume_to_jd(pdf_path,jd_text):
         "message": "RAG match completed successfully."
     }
 
+def parse_match_status(llm_response):
+    text = llm_response.lower()
+
+    if "strong match" in text:
+        return "Strong Match"
+    elif "partial match" in text:
+        return "Partial Match"
+    elif "missing" in text:
+        return "Missing"
+    else:
+        return "Unknown"
+
+
+def build_rag_summary(all_results):
+    summary_results = []
+
+    for item in all_results:
+        strong_count = 0
+        partial_count = 0
+        missing_count = 0
+        unknown_count = 0
+
+        for eval_item in item["result"]["requirements_evaluation"]:
+            status = parse_match_status(eval_item["llm_response"])
+
+            if status == "Strong Match":
+                strong_count += 1
+            elif status == "Partial Match":
+                partial_count += 1
+            elif status == "Missing":
+                missing_count += 1
+            else:
+                unknown_count += 1
+
+        ranking_score = (strong_count * 2) + (partial_count * 1)
+
+        summary_results.append({
+            "filename": item["filename"],
+            "message": item["result"]["message"],
+            "strong_matches": strong_count,
+            "partial_matches": partial_count,
+            "missing_matches": missing_count,
+            "unknown_matches": unknown_count,
+            "ranking_score": ranking_score
+        })
+
+    summary_results.sort(key=lambda x: x["ranking_score"], reverse=True)
+    return summary_results
+
 print(match_resume_to_jd("./sample_data/dummy_resume.pdf",jd_text))
     
