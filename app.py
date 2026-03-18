@@ -10,7 +10,7 @@ def save_pdf(resume_file):
 
 
 
-st.title("Resume + Job Description Matcher")
+st.title("RAG-Based Resume Screening System")
 
 resume_files = st.file_uploader("Upload Resume PDF", type =['pdf'], accept_multiple_files=True)
 jd_text = st.text_area("Paste Job Description")
